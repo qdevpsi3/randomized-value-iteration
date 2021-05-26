@@ -1,0 +1,7 @@
+absl-py
+jax
+jaxlib
+dm-env
+dm-haiku
+bsuite
+ 
