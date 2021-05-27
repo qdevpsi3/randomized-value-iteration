@@ -49,9 +49,8 @@ class ChainEnv(Environment):
         self,
         action: int,
     ) -> dm_env.TimeStep:
-        if (action == 1) and (not self._deterministic) and (self._rng.rand() <
-                                                            1. / self._size):
-            action = 0
+        if (action == 1) and (not self._deterministic):
+            action = int(self._rng.rand() < 1. / self._size)
         self._timestep += 1
         self._position = max(
             0, min(self._position + 2 * action - 1, self._size - 1))
@@ -60,7 +59,6 @@ class ChainEnv(Environment):
         if self._timestep == self._size - 1:
             self._total_regret += self._optimal_return - reward
             self.bsuite_num_episodes += 1
-
             return dm_env.termination(reward=reward, observation=observation)
         return dm_env.transition(reward=reward, observation=observation)
 
@@ -84,6 +82,7 @@ def random_coherent_basis(
     num_basis: int,
     rng: hk.PRNGSequence,
 ) -> BasisFunction:
+
     S = size
     A = 2
     H = S - 1
@@ -92,6 +91,7 @@ def random_coherent_basis(
         p = 1.
     else:
         p = (1 - 1. / S)
+
     # optimal state value function
     aux = np.array([p**t for t in range(H, 0, -1)])
     aux = np.tril(jnp.ones(H)) @ np.diag(aux)
@@ -107,7 +107,6 @@ def random_coherent_basis(
     # coherent basis
     psi_ones = jnp.ones(shape=(H * S * A, 1))
     psi_opt = jnp.reshape(q_opt, [H * S * A, 1])
-
     psi_rand = jax.random.normal(next(rng), shape=(H * S * A, K - 2))
     psi = jnp.concatenate([psi_ones, psi_opt, psi_rand], axis=1)
     proj = psi @ jnp.linalg.inv(psi.T @ psi) @ psi.T
@@ -119,6 +118,7 @@ def random_coherent_basis(
     w_proj *= H * S * A
     phi = w_proj.reshape(H, S, A, K)
 
+    # basis function
     def basis_function(h, s, a):
         return phi[h, s, a].squeeze()
 
@@ -126,12 +126,14 @@ def random_coherent_basis(
 
 
 def main(unused_arg):
+
     key = jax.random.PRNGKey(FLAGS.seed)
     rng = hk.PRNGSequence(key)
 
     # set environment
-    env = ChainEnv(size=FLAGS.size, deterministic=FLAGS.deterministic)
-    #seed=FLAGS.seed)
+    env = ChainEnv(size=FLAGS.size,
+                   deterministic=FLAGS.deterministic,
+                   seed=FLAGS.seed)
 
     # set basis function
     basis_function = random_coherent_basis(size=FLAGS.size,

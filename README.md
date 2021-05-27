@@ -33,3 +33,7 @@ You can run an experiment using the following command :
 $ cd src
 $ python chain.py
 ```
+
+<p align="center">
+<img src="./notebooks/chain.png" width="500">
+</p>
