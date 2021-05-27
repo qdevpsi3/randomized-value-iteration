@@ -8,7 +8,7 @@ from bsuite.baselines import experiment
 from bsuite.environments.base import Environment
 from dm_env import specs
 
-from rlsvi import RLSVI, BasisFunction
+from rlsvi import RLSVI, Action, BasisFunction, Features, Horizon, Observation
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer("seed", 1234, "Random seed.")
@@ -62,7 +62,7 @@ class ChainEnv(Environment):
             return dm_env.termination(reward=reward, observation=observation)
         return dm_env.transition(reward=reward, observation=observation)
 
-    def _get_observation(self):
+    def _get_observation(self) -> Observation:
         obs = self._position
         return obs
 
@@ -119,7 +119,11 @@ def random_coherent_basis(
     phi = w_proj.reshape(H, S, A, K)
 
     # basis function
-    def basis_function(h, s, a):
+    def basis_function(
+        h: Horizon,
+        s: Observation,
+        a: Action,
+    ) -> Features:
         return phi[h, s, a].squeeze()
 
     return basis_function
