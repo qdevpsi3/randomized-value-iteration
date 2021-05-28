@@ -15,7 +15,7 @@ Horizon = int
 Observation = Union[int, np.ndarray, jnp.ndarray]
 Action = int
 Features = Union[np.ndarray, jnp.ndarray]
-BasisFunction = Callable[[Horizon, Observation, Action], jnp.ndarray]
+BasisFunction = Callable[[Horizon, Observation, Action], Features]
 
 
 class AgentState(NamedTuple):
