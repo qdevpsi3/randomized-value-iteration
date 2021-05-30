@@ -1,5 +1,4 @@
 from copy import deepcopy
-from functools import partial
 from typing import Callable, List, NamedTuple, Tuple, Union
 
 import dm_env
@@ -54,7 +53,7 @@ def _sample(
     return s
 
 
-@partial(jax.jit, static_argnums=(3, ))
+@jax.jit
 def _lstsq(
     A: jnp.ndarray,
     b: jnp.ndarray,
